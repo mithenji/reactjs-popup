@@ -1,0 +1,67 @@
+---
+id: react18-features
+title: React 18 Features Support
+sidebar_label: React 18 Features
+---
+
+# React 18 Features Support
+
+Reactjs-popup fully supports React 18's new features:
+
+## Automatic Batching
+
+All state updates in callbacks, promises, and native event handlers are now automatically batched:
+
+```jsx
+const Modal = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [data, setData] = useState(null);
+
+  const handleClick = async () => {
+    // These will be batched
+    setIsOpen(true);
+    setData(await fetchData());
+  };
+  
+  return (
+    <Popup open={isOpen}>
+      {data}
+    </Popup>
+  );
+};
+```
+
+## Concurrent Features
+
+Support for Suspense and concurrent rendering:
+
+```jsx
+<Suspense fallback={<LoadingSpinner />}>
+  <Popup>
+    <AsyncContent />
+  </Popup>
+</Suspense>
+```
+
+## Transitions
+
+Use transitions for non-urgent updates:
+
+```jsx
+const Modal = () => {
+  const [isPending, startTransition] = useTransition();
+  
+  const handleChange = (e) => {
+    startTransition(() => {
+      // Non-urgent update
+      setFilteredResults(e.target.value);
+    });
+  };
+  
+  return (
+    <Popup>
+      {isPending ? <Spinner /> : <Results />}
+    </Popup>
+  );
+};
+``` 

@@ -20,22 +20,36 @@ This is the list of props that you should probably know about👇
 Element to be rendered in-place where the popup is defined
 
 ```jsx
-// need to forward ref if you are trying to use a function trigger with React Component
+// Using function components with forwardRef
 
-// Works
-<Popup
-  trigger={open => (
-    <button className="button">Trigger - {open ? 'Opened' : 'Closed'}</button>
-  )}
-  position="right center"
-  closeOnDocumentClick
->
-  <span> Popup content </span>
-</Popup>;
+const Popup = () => (
+  <Popup
+    trigger={open => (
+      <button 
+        type="button"
+        className="button"
+        aria-expanded={open}
+      >
+        Trigger - {open ? 'Opened' : 'Closed'}
+      </button>
+    )}
+    position="right center"
+    closeOnDocumentClick
+  >
+    <span> Popup content </span>
+  </Popup>
+);
 
-// works too
+// Using forwardRef component
+
 const CustomButton = React.forwardRef(({ open, ...props }, ref) => (
-  <button className="button" ref={ref} {...props}>
+  <button 
+    className="button" 
+    ref={ref} 
+    {...props}
+    type="button"
+    aria-expanded={open}
+  >
     Trigger - {props.open ? 'Opened' : 'Closed'}
   </button>
 ));

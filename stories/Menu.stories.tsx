@@ -1,8 +1,9 @@
 import React from 'react';
-import { Story, Meta } from '@storybook/react/types-6-0';
+import type { Meta as StorybookMeta, StoryObj } from '@storybook/react-webpack5';
+import { action } from '@storybook/addon-actions';
 import { PopupProps } from '../src/types';
 import { Popup } from '../src';
-import { Center } from './components';
+import { Button, Center } from './components';
 
 import './index.css';
 
@@ -23,51 +24,9 @@ const Menu = () => (
       arrow={false}
     >
       <div className="menu">
-        <div className="menu-item"> item 1</div>
-        <div className="menu-item"> item 2</div>
-        <div className="menu-item"> item 3</div>
-        <Popup
-          trigger={<div className="menu-item"> Sub Menu</div>}
-          position={['right top', 'left top']}
-          on="hover"
-          contentStyle={{ padding: '0px', border: 'none' }}
-          arrow={false}
-        >
-          <div className="menu">
-            <div className="menu-item"> item 1 sjdh</div>
-            <div className="menu-item"> item 2</div>
-            <Popup
-              trigger={<div className="menu-item"> Sub Menu</div>}
-              position={[
-                'right top',
-                'left top',
-                'right bottom',
-                'left bottom',
-              ]}
-              on="hover"
-              contentStyle={{ padding: '0px', border: 'none' }}
-              arrow={false}
-            >
-              <div className="menu">
-                <div className="menu-item"> item 1</div>
-                <div className="menu-item"> item 2</div>
-                <Popup
-                  trigger={<div className="menu-item"> Sub Menu</div>}
-                  position={['right top', 'left top']}
-                  on="hover"
-                >
-                  <div className="menu">
-                    <div className="menu-item"> item 1</div>
-                    <div className="menu-item"> item 2</div>
-                    <div className="menu-item"> item 3</div>
-                  </div>
-                </Popup>
-                <div className="menu-item"> item 3</div>
-              </div>
-            </Popup>
-            <div className="menu-item"> item 3</div>
-          </div>
-        </Popup>
+        <div className="menu-item">Submenu Item 1</div>
+        <div className="menu-item">Submenu Item 2</div>
+        <div className="menu-item">Submenu Item 3</div>
       </div>
     </Popup>
     <div className="menu-item"> item 4</div>
@@ -75,19 +34,33 @@ const Menu = () => (
   </div>
 );
 
-export default {
+type Story = StoryObj<typeof Popup>;
+
+interface Meta extends StorybookMeta<typeof Popup> {
+  argTypes?: {
+    onOpen?: { action: string };
+    onClose?: { action: string };
+  };
+}
+
+const meta: Meta = {
   title: 'Example/Menu',
   component: Popup,
-} as Meta;
+  parameters: {
+    layout: 'centered',
+  },
+  argTypes: {
+    onOpen: { action: 'opened' },
+    onClose: { action: 'closed' }
+  }
+};
 
-const Template: Story<PopupProps> = args => (
-  <Center>
-    <Menu />
-  </Center>
-);
+export default meta;
 
-export const SimpleTooltip = Template.bind({});
-
-SimpleTooltip.args = {
-  trigger: <button> click Me </button>,
+export const SimpleMenu: Story = {
+  render: () => (
+    <Center>
+      <Menu />
+    </Center>
+  ),
 };

@@ -27,6 +27,12 @@ module.exports = {
       theme: lightCodeTheme,
       darkTheme: darkCodeTheme,
     },
+    algolia: {
+      // 添加搜索功能
+      appId: 'YOUR_APP_ID',
+      apiKey: 'YOUR_API_KEY',
+      indexName: 'YOUR_INDEX_NAME',
+    },
     navbar: {
       title: 'Reactjs-popup',
       logo: {
@@ -48,6 +54,11 @@ module.exports = {
           href: 'https://github.com/yjose/reactjs-popup',
           label: 'GitHub',
           position: 'right',
+        },
+        {
+          to: 'docs/react18-features',
+          label: 'React 18 Features',
+          position: 'left',
         },
       ],
     },
@@ -85,5 +96,10 @@ module.exports = {
         },
       },
     ],
+  ],
+  plugins: [
+    // 添加新的插件支持
+    '@docusaurus/plugin-ideal-image',
+    '@docusaurus/plugin-pwa',
   ],
 };

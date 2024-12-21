@@ -18,9 +18,36 @@ import CustomModal from './../examples/CustomModal.js';
 To create a simple modal with reactjs-popup you just need to add the 'modal' attribute to your popup component.
 
 ```jsx
+import React, { useCallback } from 'react';
+
 const Modal = () => (
-  <Popup trigger={<button className="button"> Open Modal </button>} modal>
-    <span> Modal content </span>
+  <Popup 
+    trigger={
+      <button 
+        type="button" 
+        className="button"
+        aria-haspopup="dialog"
+      > 
+        Open Modal 
+      </button>
+    } 
+    modal
+    nested
+  >
+    {close => (
+      <div role="dialog" aria-modal="true">
+        <button
+          onClick={close}
+          aria-label="Close modal"
+          className="close-button"
+        >
+          &times;
+        </button>
+        <div className="modal-content">
+          Modal content
+        </div>
+      </div>
+    )}
   </Popup>
 );
 ```

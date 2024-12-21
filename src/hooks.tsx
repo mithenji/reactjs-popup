@@ -1,72 +1,70 @@
-import { useEffect, RefObject, useLayoutEffect } from 'react';
+import React, { useEffect, RefObject, useLayoutEffect, useCallback } from 'react';
 
 export const useOnEscape = (
   handler: (event: KeyboardEvent) => void,
   active = true
-) => {
+): void => {
+  const memoizedHandler = useCallback((event: KeyboardEvent) => {
+    if (event.key === 'Escape') handler(event);
+  }, [handler]);
+
   useEffect(() => {
     if (!active) return;
-    const listener = (event: KeyboardEvent) => {
-      // check if key is an Escape
-      if (event.key === 'Escape') handler(event);
-    };
-    document.addEventListener('keyup', listener);
-
-    return () => {
-      if (!active) return;
-      document.removeEventListener('keyup', listener);
-    };
-  }, [handler, active]);
+    
+    document.addEventListener('keyup', memoizedHandler);
+    return () => document.removeEventListener('keyup', memoizedHandler);
+  }, [memoizedHandler, active]);
 };
 
 export const useRepositionOnResize = (handler: () => void, active = true) => {
+  const memoizedHandler = useCallback(() => {
+    handler();
+  }, [handler]);
+  
   useEffect(() => {
     if (!active) return;
-    const listener = () => {
-      handler();
-    };
-
-    window.addEventListener('resize', listener);
-
-    return () => {
-      if (!active) return;
-      window.removeEventListener('resize', listener);
-    };
-  }, [handler, active]);
+    
+    window.addEventListener('resize', memoizedHandler);
+    return () => window.removeEventListener('resize', memoizedHandler);
+  }, [memoizedHandler, active]);
 };
 
-export const useOnClickOutside = (
-  ref: RefObject<HTMLElement> | RefObject<HTMLElement>[],
-  handler: (event: TouchEvent | MouseEvent) => void,
-  active = true
-) => {
-  useEffect(() => {
-    if (!active) return;
-    const listener = (event: TouchEvent | MouseEvent) => {
-      // Do nothing if clicking ref's element or descendent elements
-      const refs = Array.isArray(ref) ? ref : [ref];
+interface UseOnClickOutsideOptions {
+  refs: RefObject<HTMLElement>[];
+  handler: (event: MouseEvent | TouchEvent) => void;
+  enabled?: boolean;
+}
 
+export function useOnClickOutside({
+  refs,
+  handler,
+  enabled = true
+}: UseOnClickOutsideOptions) {
+  useEffect(() => {
+    if (!enabled) return;
+
+    const listener = (event: MouseEvent | TouchEvent) => {
       let contains = false;
-      refs.forEach(r => {
-        if (!r.current || r.current.contains(event.target as Node)) {
+      refs.forEach(ref => {
+        if (!ref.current || ref.current.contains(event.target as Node)) {
           contains = true;
-          return;
         }
       });
-      event.stopPropagation();
-      if (!contains) handler(event);
+      if (!contains) {
+        handler(event);
+      }
     };
-
+    
     document.addEventListener('mousedown', listener);
     document.addEventListener('touchstart', listener);
-
+    
     return () => {
-      if (!active) return;
+      if (!enabled) return;
       document.removeEventListener('mousedown', listener);
       document.removeEventListener('touchstart', listener);
     };
-  }, [ref, handler, active]);
-};
+  }, [handler, refs, enabled]);
+}
 
 // Make sure that user is not able TAB out of the Modal content on Open
 export const useTabbing = (

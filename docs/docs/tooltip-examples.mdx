@@ -18,13 +18,24 @@ import BoundedTooltip from './../examples/BoundedTooltip.js';
 <SimpleTooltip />
 
 ```jsx
+import React, { useCallback } from 'react';
+
 const Tooltip = () => (
   <Popup
     trigger={open => (
-      <button className="button">Trigger - {open ? 'Opened' : 'Closed'}</button>
+      <button 
+        type="button"
+        className="button"
+        aria-describedby="tooltip-content"
+        aria-expanded={open}
+      >
+        Trigger - {open ? 'Opened' : 'Closed'}
+      </button>
     )}
     position="right center"
     closeOnDocumentClick
+    role="tooltip"
+    id="tooltip-content"
   >
     <span> Popup content </span>
   </Popup>

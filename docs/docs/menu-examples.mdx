@@ -8,6 +8,7 @@ description: A simple Menu example with reactjs-popup
 ---
 
 import SimpleMenu from './../examples/SimpleMenu.js';
+import React, { useCallback } from 'react';
 
 # React Menu
 
@@ -17,12 +18,20 @@ You can create a nested menu with reactjs-popup easily as the following example 
 
 ```jsx
 const Menu = () => (
-  <div className="menu">
+  <nav className="menu" role="navigation">
     <div className="menu-item"> Menu item 1</div>
     <div className="menu-item"> Menu item 2</div>
     <div className="menu-item"> Menu item 3</div>
     <Popup
-      trigger={<div className="menu-item"> Sub menu </div>}
+      trigger={
+        <button 
+          type="button"
+          className="menu-item"
+          aria-haspopup="true"
+        > 
+          Sub menu 
+        </button>
+      }
       position="right top"
       on="hover"
       closeOnDocumentClick
@@ -31,14 +40,14 @@ const Menu = () => (
       contentStyle={{ padding: '0px', border: 'none' }}
       arrow={false}
     >
-      <div className="menu">
-        <div className="menu-item"> item 1</div>
-        <div className="menu-item"> item 2</div>
-        <div className="menu-item"> item 3</div>
+      <div className="menu" role="menu">
+        <div className="menu-item" role="menuitem"> item 1</div>
+        <div className="menu-item" role="menuitem"> item 2</div>
+        <div className="menu-item" role="menuitem"> item 3</div>
       </div>
     </Popup>
     <div className="menu-item"> Menu item 4</div>
-  </div>
+  </nav>
 );
 ```
 

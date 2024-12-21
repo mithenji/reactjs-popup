@@ -1,22 +1,73 @@
 .modal-title {
   border-bottom: 1px dashed #000;
   text-align: center;
+  padding: 1rem;
+  margin-bottom: 1rem;
 }
+
 .modal-content {
-  padding: 20px;
+  padding: 1.5rem;
+  line-height: 1.5;
 }
 
 .modal-close {
-  color: #aaa;
-  line-height: 50px;
-  font-size: 80%;
   position: absolute;
-  right: 0;
-  text-align: center;
-  top: 0;
-  width: 70px;
-  text-decoration: none;
+  right: 1rem;
+  top: 1rem;
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #666;
+  transition: color 0.2s ease;
 }
+
 .modal-close:hover {
-  color: black;
+  color: #000;
+}
+
+.popup-content {
+  position: relative;
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 添加动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.popup-content {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* 可访问性焦点样式 */
+:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+/* 暗色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .popup-content {
+    background: #333;
+    color: #fff;
+  }
+  
+  .modal-close {
+    color: #999;
+  }
+  
+  .modal-close:hover {
+    color: #fff;
+  }
 }

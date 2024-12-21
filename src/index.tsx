@@ -4,9 +4,13 @@ import React, {
   useEffect,
   forwardRef,
   useImperativeHandle,
+  ReactNode,
+  Suspense,
+  HTMLAttributes,
+  useCallback,
 } from 'react';
-import ReactDOM from 'react-dom';
-import { PopupProps, PopupActions } from './types';
+import { createPortal } from 'react-dom';
+import { PopupProps, PopupActions, PopupPosition } from './types';
 import {
   useOnEscape,
   useRepositionOnResize,
@@ -33,6 +37,22 @@ const getRootPopup = () => {
 
   return PopupRoot;
 };
+
+// 添加类型声明
+interface TriggerProps {
+  'aria-describedby': string;
+  ref: React.RefObject<HTMLElement>;
+  onClick?: (event: React.MouseEvent) => void;
+  onContextMenu?: (event: React.MouseEvent) => void;
+  onMouseEnter?: (event: React.MouseEvent) => void;
+  onMouseLeave?: (event: React.MouseEvent) => void;
+  onFocus?: (event: React.FocusEvent) => void;
+  onBlur?: (event: React.FocusEvent) => void;
+}
+
+interface DivProps extends HTMLAttributes<HTMLDivElement> {}
+
+type PopupChildrenType = React.ReactNode | ((close: () => void, isOpen: boolean) => React.ReactNode);
 
 export const Popup = forwardRef<PopupActions, PopupProps>(
   (
@@ -61,7 +81,7 @@ export const Popup = forwardRef<PopupActions, PopupProps>(
       mouseEnterDelay = 100,
       mouseLeaveDelay = 100,
       keepTooltipInside = false,
-      children,
+      children: childrenProp,
     },
     ref
   ) => {
@@ -71,6 +91,7 @@ export const Popup = forwardRef<PopupActions, PopupProps>(
     const arrowRef = useRef<HTMLDivElement>(null);
     const focusedElBeforeOpen = useRef<Element | null>(null);
     const popupId = useRef<string>(`popup-${++popupIdCounter}`);
+    const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
 
     const isModal = modal ? true : !trigger;
     const timeOut = useRef<any>(0);
@@ -146,7 +167,7 @@ export const Popup = forwardRef<PopupActions, PopupProps>(
       const focusableEls = contentRef?.current?.querySelectorAll(
         'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex="0"]'
       );
-      const firstEl = Array.prototype.slice.call(focusableEls)[0];
+      const firstEl = focusableEls ? Array.from(focusableEls)[0] as HTMLElement : null;
       firstEl?.focus();
     };
 
@@ -165,15 +186,15 @@ export const Popup = forwardRef<PopupActions, PopupProps>(
     // set Position
     const setPosition = () => {
       if (isModal || !isOpen) return;
-      if (!triggerRef?.current || !triggerRef?.current || !contentRef?.current)
-        return; /// show error as one of ref is undefined
+      if (!triggerRef?.current || !contentRef?.current) return;
+      
       const trigger = triggerRef.current.getBoundingClientRect();
       const content = contentRef.current.getBoundingClientRect();
-
+      
       const cords = calculatePosition(
         trigger,
         content,
-        position,
+        position as PopupPosition,
         arrow,
         {
           offsetX,
@@ -201,10 +222,10 @@ export const Popup = forwardRef<PopupActions, PopupProps>(
     useTabbing(contentRef, isOpen && isModal);
     useRepositionOnResize(setPosition, repositionOnResize);
     useOnClickOutside(
-      !!trigger ? [contentRef, triggerRef] : [contentRef],
-      closePopup,
-      closeOnDocumentClick && !nested
-    ); // we need to add a ne
+      { refs: !!trigger ? [contentRef, triggerRef] : [contentRef], 
+        handler: closePopup, 
+        enabled: closeOnDocumentClick && !nested }
+    );
     // render the trigger element and add events
     const renderTrigger = () => {
       const triggerProps: any = {
@@ -235,10 +256,10 @@ export const Popup = forwardRef<PopupActions, PopupProps>(
 
       if (typeof trigger === 'function') {
         const comp = trigger(isOpen);
-        return !!trigger && React.cloneElement(comp, triggerProps);
+        return comp ? React.cloneElement(comp, triggerProps) : null;
       }
 
-      return !!trigger && React.cloneElement(trigger, triggerProps);
+      return trigger ? React.cloneElement(trigger, triggerProps) : null;
     };
 
     const addWarperAction = () => {
@@ -272,81 +293,99 @@ export const Popup = forwardRef<PopupActions, PopupProps>(
       return childrenElementProps;
     };
 
-    const renderContent = () => {
-      return (
-        <div
-          {...addWarperAction()}
-          key="C"
-          role={isModal ? 'dialog' : 'tooltip'}
-          id={popupId.current}
-        >
-          {arrow && !isModal && (
-            <div ref={arrowRef} style={styles.popupArrow}>
-              <svg
-                data-testid="arrow"
-                className={`popup-arrow ${
-                  className !== ''
-                    ? className
-                        .split(' ')
-                        .map(c => `${c}-arrow`)
-                        .join(' ')
-                    : ''
-                }`}
-                viewBox="0 0 32 16"
-                style={{
-                  position: 'absolute',
-                  ...arrowStyle,
-                }}
-              >
-                <path d="M16 0l16 16H0z" fill="currentcolor" />
-              </svg>
-            </div>
-          )}
-          {children && typeof children === 'function'
-            ? children(closePopup, isOpen)
-            : children}
-        </div>
-      );
-    };
+    const renderContent = useCallback(
+      (close: () => void, isOpen: boolean) => {
+        return typeof childrenProp === 'function' 
+          ? childrenProp(close, isOpen) 
+          : childrenProp;
+      },
+      [childrenProp]
+    );
 
     const overlay = !(on.indexOf('hover') >= 0);
     const ovStyle = isModal ? styles.overlay.modal : styles.overlay.tooltip;
 
-    const content = [
-      overlay && (
-        <div
-          key="O"
-          data-testid="overlay"
-          data-popup={isModal ? 'modal' : 'tooltip'}
-          className={`popup-overlay ${
-            className !== ''
-              ? className
-                  .split(' ')
-                  .map(c => `${c}-overlay`)
-                  .join(' ')
-              : ''
-          }`}
-          style={{
-            ...ovStyle,
-            ...overlayStyle,
-            pointerEvents:
-              (closeOnDocumentClick && nested) || isModal ? 'auto' : 'none',
-          }}
-          onClick={closeOnDocumentClick && nested ? closePopup : undefined}
-          tabIndex={-1}
-        >
-          {isModal && renderContent()}
-        </div>
-      ),
+    const renderPopupContent = () => (
+      <>
+        {overlay && (
+          <div
+            key="O"
+            data-testid="overlay"
+            data-popup={isModal ? 'modal' : 'tooltip'}
+            className={`popup-overlay ${className ? className.split(' ').map(c => `${c}-overlay`).join(' ') : ''}`}
+            style={{
+              ...ovStyle,
+              ...overlayStyle,
+              pointerEvents: (closeOnDocumentClick && nested) || isModal ? 'auto' : 'none',
+            }}
+            onClick={closeOnDocumentClick && nested ? closePopup : undefined}
+            tabIndex={-1}
+          >
+            {isModal && (
+              <div
+                {...addWarperAction()}
+                key="C"
+                role={isModal ? 'dialog' : 'tooltip'}
+                id={popupId.current}
+              >
+                {arrow && !isModal && (
+                  <div ref={arrowRef} style={styles.popupArrow}>
+                    <svg
+                      data-testid="arrow"
+                      className={`popup-arrow ${className ? className.split(' ').map(c => `${c}-arrow`).join(' ') : ''}`}
+                      viewBox="0 0 32 16"
+                      style={{
+                        position: 'absolute',
+                        ...arrowStyle,
+                      }}
+                    >
+                      <path d="M16 0l16 16H0z" fill="currentcolor" />
+                    </svg>
+                  </div>
+                )}
+                {renderContent(closePopup, isOpen)}
+              </div>
+            )}
+          </div>
+        )}
+        {!isModal && (
+          <div
+            {...addWarperAction()}
+            key="C"
+            role={isModal ? 'dialog' : 'tooltip'}
+            id={popupId.current}
+          >
+            {arrow && !isModal && (
+              <div ref={arrowRef} style={styles.popupArrow}>
+                <svg
+                  data-testid="arrow"
+                  className={`popup-arrow ${className ? className.split(' ').map(c => `${c}-arrow`).join(' ') : ''}`}
+                  viewBox="0 0 32 16"
+                  style={{
+                    position: 'absolute',
+                    ...arrowStyle,
+                  }}
+                >
+                  <path d="M16 0l16 16H0z" fill="currentcolor" />
+                </svg>
+              </div>
+            )}
+            {renderContent(closePopup, isOpen)}
+          </div>
+        )}
+      </>
+    );
 
-      !isModal && renderContent(),
-    ];
+    // 初始化 portal container
+    useEffect(() => {
+      setPortalContainer(getRootPopup());
+    }, []);
 
     return (
-      <>
+      <Suspense fallback={<div>Loading...</div>}>
         {renderTrigger()}
-        {isOpen && ReactDOM.createPortal(content, getRootPopup())}
-      </>
+        {isOpen && portalContainer && createPortal(renderPopupContent(), portalContainer)}
+      </Suspense>
     );
   }
 );

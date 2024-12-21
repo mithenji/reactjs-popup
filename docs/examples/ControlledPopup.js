@@ -1,26 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import Warper from './Warper';
 import Popup from 'reactjs-popup';
-//
 
 const ControlledPopup = () => {
   const [open, setOpen] = useState(false);
-  const closeModal = () => setOpen(false);
+  
+  const closeModal = useCallback(() => {
+    setOpen(false);
+  }, []);
+
+  const handleToggle = useCallback(() => {
+    setOpen(prev => !prev);
+  }, []);
+
   return (
     <div>
-      <button type="button" className="button" onClick={() => setOpen(o => !o)}>
+      <button 
+        type="button" 
+        className="button" 
+        onClick={handleToggle}
+      >
         Controlled Popup
       </button>
-      <Popup open={open} closeOnDocumentClick onClose={closeModal}>
-        <div className="modal">
-          <a className="close" onClick={closeModal}>
-            &times;
-          </a>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Beatae magni
-          omnis delectus nemo, maxime molestiae dolorem numquam mollitia,
-          voluptate ea, accusamus excepturi deleniti ratione sapiente!
-          Laudantium, aperiam doloribus. Odit, aut.
-        </div>
+      <Popup 
+        open={open} 
+        closeOnDocumentClick 
+        onClose={closeModal}
+      >
+        {close => (
+          <div className="modal">
+            <button 
+              className="close" 
+              onClick={close}
+              aria-label="Close modal"
+            >
+              &times;
+            </button>
+            <div className="modal-content">
+              Lorem ipsum dolor sit amet...
+            </div>
+          </div>
+        )}
       </Popup>
     </div>
   );

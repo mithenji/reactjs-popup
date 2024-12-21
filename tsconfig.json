@@ -1,24 +1,23 @@
 {
-  "include": ["src", "types", "stories"],
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"],
   "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "jsx": "react",
     "module": "esnext",
-    "lib": ["dom", "esnext"],
-    "importHelpers": true,
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
     "declaration": true,
     "sourceMap": true,
-    "rootDir": "./",
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "node",
-    "baseUrl": "./",
-    "paths": {
-      "@": ["./"],
-      "*": ["src/*", "node_modules/*"]
-    },
-    "jsx": "react",
-    "esModuleInterop": true
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "types": ["node", "react", "react-dom", "jest"],
+    "typeRoots": ["./node_modules/@types"]
   }
 }

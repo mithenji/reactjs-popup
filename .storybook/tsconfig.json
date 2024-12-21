@@ -1,0 +1,22 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "outDir": "../dist",
+    "rootDir": "../",
+    "baseUrl": "../",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include": [
+    "../stories/**/*",
+    "*.ts",
+    "*.js"
+  ],
+  "exclude": [
+    "../node_modules/**/*",
+    "../dist"
+  ]
+} 

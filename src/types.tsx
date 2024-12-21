@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode, CSSProperties } from 'react';
 
 export type EventType = 'hover' | 'click' | 'focus' | 'right-click';
 export type PopupPosition =
@@ -17,20 +17,24 @@ export type PopupPosition =
   | 'center center';
 
 export type PopupActions = {
-  open: () => void;
-  close: () => void;
-  toggle: () => void;
+  readonly open: () => void;
+  readonly close: () => void;
+  readonly toggle: () => void;
 };
+
+export interface ArrowStyle extends CSSProperties {
+  top?: string;
+  left?: string;
+}
+
 export interface PopupProps {
-  trigger?: JSX.Element | ((isOpen: boolean) => JSX.Element);
+  trigger?: React.ReactElement | ((isOpen: boolean) => React.ReactElement);
   open?: boolean;
   disabled?: boolean;
   nested?: boolean;
   defaultOpen?: boolean;
   on?: EventType | EventType[];
-  children: React.ReactNode;
-
-  //| ((close: () => void, isOpen: boolean) => React.ReactNode);
+  children: ReactNode | ((close: () => void, isOpen: boolean) => ReactNode);
   position?: PopupPosition | PopupPosition[];
   offsetX?: number;
   offsetY?: number;
@@ -43,13 +47,12 @@ export interface PopupProps {
   mouseEnterDelay?: number;
   mouseLeaveDelay?: number;
   onOpen?: (event?: React.SyntheticEvent) => void;
-  // the popup can be closed depend on multiple factor: mouse click outside, keyboard esc, click a close button
   onClose?: (
     event?: React.SyntheticEvent | KeyboardEvent | TouchEvent | MouseEvent
   ) => void;
-  contentStyle?: React.CSSProperties;
-  overlayStyle?: React.CSSProperties;
-  arrowStyle?: React.CSSProperties;
+  contentStyle?: CSSProperties;
+  overlayStyle?: CSSProperties;
+  arrowStyle?: ArrowStyle;
   className?: string;
   keepTooltipInside?: boolean | string;
 }

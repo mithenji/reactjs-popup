@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import Warper from './Warper';
 import Popup from 'reactjs-popup';
 //
@@ -8,86 +8,68 @@ const contentStyle = {
   width: '90%',
 };
 
-const CustomModal = () => (
-  <Popup
-    trigger={
-      <button type="button" className="button">
-        Open Modal
-      </button>
-    }
-    modal
-    lockScroll={true}
-    contentStyle={contentStyle}
-    nested
-  >
-    {close => (
-      <div className="modal">
-        <button className="close" onClick={close}>
-          &times;
+const CustomModal = () => {
+  const handleClose = useCallback((close) => {
+    console.log('modal closed');
+    close();
+  }, []);
+
+  return (
+    <Popup
+      trigger={
+        <button type="button" className="button">
+          Open Modal
         </button>
-        <div className="header"> Modal Title </div>
-        <div className="content">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Atque, a
-          nostrum. Dolorem, repellat quidem ut, minima sint vel eveniet
-          quibusdam voluptates delectus doloremque, explicabo tempore dicta
-          adipisci fugit amet dignissimos?
-          <br />
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Consequatur
-          sit commodi beatae optio voluptatum sed eius cumque, delectus saepe
-          repudiandae explicabo nemo nam libero ad, doloribus, voluptas rem
-          alias. Vitae?
-        </div>
-        <div className="actions">
-          <Popup
-            trigger={
-              <button type="button" className="button">
-                Menu Demo
-              </button>
-            }
-            position="top center"
-            closeOnDocumentClick
-            contentStyle={{ padding: '0px' }}
-            nested
-            keepTooltipInside
+      }
+      modal
+      lockScroll={true}
+      contentStyle={contentStyle}
+      nested
+    >
+      {close => (
+        <div className="modal" role="dialog" aria-modal="true">
+          <button 
+            className="close" 
+            onClick={close}
+            aria-label="Close modal"
           >
-            <div className="popup-menu">
-              <div className="menu-item"> Menu item 1</div>
-              <div className="menu-item"> Menu item 2</div>
-              <div className="menu-item"> Menu item 3</div>
-              <Popup
-                trigger={<div className="menu-item"> Sup Menu </div>}
-                position="right top"
-                on="hover"
-                closeOnDocumentClick
-                mouseLeaveDelay={300}
-                mouseEnterDelay={0}
-                contentStyle={{ padding: '0px', border: 'none' }}
-                arrow={false}
-                keepTooltipInside
-              >
-                <div className="popup-menu">
-                  <div className="menu-item"> item 1</div>
-                  <div className="menu-item"> item 2</div>
-                  <div className="menu-item"> item 3</div>
-                </div>
-              </Popup>
-              <div className="menu-item"> Menu item 4</div>
-            </div>
-          </Popup>
-          <button
-            type="button"
-            className="button"
-            onClick={() => {
-              console.log('modal closed ');
-              close();
-            }}
-          >
-            close modal
+            &times;
           </button>
+          <div className="header">
+            <h2>Modal Title</h2>
+          </div>
+          <div className="content">
+            {/* Modal content */}
+          </div>
+          <div className="actions">
+            <Popup
+              trigger={
+                <button type="button" className="button">
+                  Menu Demo
+                </button>
+              }
+              position="top center"
+              closeOnDocumentClick
+              contentStyle={{ padding: '0px' }}
+              nested
+              keepTooltipInside
+            >
+              <nav className="popup-menu" role="menu">
+                {/* Menu items */}
+              </nav>
+            </Popup>
+            <button
+              type="button"
+              className="button"
+              onClick={() => handleClose(close)}
+            >
+              Close Modal
+            </button>
+          </div>
         </div>
-      </div>
-    )}
-  </Popup>
-);
+      )}
+    </Popup>
+  );
+};
 
 export default Warper(CustomModal);
